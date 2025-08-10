@@ -14,6 +14,6 @@ A widget for keeping track of how much time you spend working and when. Can be p
 * The completion percentage is customizeable, so you can set your own daily goal of hours to work.
 
 ## Demonstration
-![Clock demonstration](https://github.com/TheLaughingDuck/Small_Projects/blob/main/Work_clock/images/clock.png)
-![Clock demonstration](https://github.com/TheLaughingDuck/Small_Projects/blob/main/Work_clock/images/clock_later.png)
-![Clock demonstration](https://github.com/TheLaughingDuck/Small_Projects/blob/main/Work_clock/images/clock_87.png)
+![Clock demonstration](https://github.com/TheLaughingDuck/Work_clock/blob/main/images/clock.png)
+![Clock demonstration](https://github.com/TheLaughingDuck/Work_clock/blob/main/images/clock_later.png)
+![Clock demonstration](https://github.com/TheLaughingDuck/Work_clock/blob/main/images/clock_87.png)
