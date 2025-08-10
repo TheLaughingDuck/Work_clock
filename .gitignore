@@ -3,8 +3,15 @@ clock_vnv
 
 # Local data
 data.sqlite3
+workdays.csv
+workdays.txt
+workdays.png
+workblocks.csv
+workblocks.txt
+workblocks.png
 
 # Local files
 build/
 clock.spec
 dev_notes.md
+test.py
