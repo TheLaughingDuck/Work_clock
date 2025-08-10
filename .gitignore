@@ -3,3 +3,8 @@ clock_vnv
 
 # Local data
 data.sqlite3
+
+# Local files
+build/
+clock.spec
+dev_notes.md
