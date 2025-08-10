@@ -8,7 +8,7 @@ import tkinter as tk
 import time
 from datetime import datetime
 import sqlite3
-from manage import save_data
+from manage import save_data, create_database
 
 
 #### MAIN PROGRAM
@@ -157,20 +157,6 @@ def save_workblock_data(start_time, end_time, hours):
     # Connect and save the new workdayblock record
     conn = sqlite3.connect("data.sqlite3", isolation_level=None)
     conn.execute(f"INSERT INTO 'workblocks' (date, start_time, end_time, hours) VALUES ('{datetime.date(datetime.today())}', '{start_time}', '{end_time}', {hours})")
-
-def create_database():
-    '''Creates the database file in case it does not already exist.'''
-
-    # Connect and create tables
-    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL)")
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL)")
-    conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
-    
-    # Insert constants into the constants table
-    try:
-        conn.execute("INSERT INTO 'constants' (variable, value) VALUES ('WORKDAY_HOURS', 5);")
-    except: pass
 
 
 #### MAIN PROGRAM INITIATOR (i.e. start the loop when the script is run)

@@ -16,16 +16,6 @@ import numpy as np
 
 #### MAIN UI PROGRAM LOOP
 def main():
-    # CREATE THE DATABASE file if it does not already exist.
-    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
-    conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
-    
-    try:
-        conn.execute("INSERT INTO 'constants' (variable, value) VALUES ('WORKDAY_HOURS', 5);")
-    except: pass
-
     # Loop while user issues commands
     while True:
         print("\nWhat would you like to do?")
@@ -70,6 +60,19 @@ def help():
     print("\texit: Close the Work Clock manager.")
     print("\thelp: Show this message.\n")
 
+def create_database():
+    '''Creates the database file in case it does not already exist.'''
+
+    # Connect and create tables
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
+    conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
+    conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
+    conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
+    
+    # Insert constants into the constants table
+    try:
+        conn.execute("INSERT INTO 'constants' (variable, value) VALUES ('WORKDAY_HOURS', 5);")
+    except: pass
 
 def save_data(frmt:str):
     '''Save the data as either .png or .txt'''
@@ -139,4 +142,5 @@ def save_data(frmt:str):
 
 #### MAIN PROGRAM LOOP INITIATOR (i.e. start the loop when the script is run)
 if __name__ == "__main__":
+    create_database()
     main()
