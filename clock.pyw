@@ -24,9 +24,8 @@ class WorkClockApp:
 
         # Load customizeable constants from the database
         create_database()
-        conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
+        conn = sqlite3.connect("data.sqlite3", isolation_level=None)
         WORKDAY_HOURS = conn.execute("SELECT value FROM 'constants' WHERE variable = 'WORKDAY_HOURS'").fetchall()[0]
-        print(WORKDAY_HOURS)
 
         # Set up widget window
         self.root = root
@@ -144,21 +143,21 @@ def save_workday_data(start_time, end_time, hours):
     '''Create a new workday record in the datebase file.'''
     
     # Connect and save the new workday record
-    conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
     conn.execute(f"INSERT INTO 'workdays' (date, start_time, end_time, hours) VALUES ('{datetime.date(datetime.today())}', '{start_time}', '{end_time}', {hours})")
 
 def save_workblock_data(start_time, end_time, hours):
     '''Create a new workblock record in the datebase file.'''
     
     # Connect and save the new workdayblock record
-    conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
     conn.execute(f"INSERT INTO 'workblocks' (date, start_time, end_time, hours) VALUES ('{datetime.date(datetime.today())}', '{start_time}', '{end_time}', {hours})")
 
 def create_database():
     '''Creates the database file in case it does not already exist.'''
 
     # Connect and create tables
-    conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
     conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL)")
     conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL)")
     conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
