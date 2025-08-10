@@ -141,6 +141,7 @@ class WorkClockApp:
 
         # Destroy window
         self.root.destroy()
+        self.Destroy()
 
 
 #### HELPER FUNCTIONS
