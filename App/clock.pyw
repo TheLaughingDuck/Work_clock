@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 import sqlite3
 from manage import save_data, create_database
+import sys
 
 
 #### MAIN PROGRAM
@@ -70,6 +71,7 @@ class WorkClockApp:
 
         self.root.bind("<Button-1>", self.toggle_timer)  # Left-click to pause/resume
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+    
     
     def draw_progress_bar(self):
         '''Draw the progress bar border.'''
@@ -141,7 +143,7 @@ class WorkClockApp:
 
         # Destroy window
         self.root.destroy()
-        self.Destroy()
+        sys.exit()
 
 
 #### HELPER FUNCTIONS

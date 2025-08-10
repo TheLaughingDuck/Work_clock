@@ -120,14 +120,25 @@ def save_data(frmt:str):
             mins = pd.date_range(block[1], block[2], freq="1min").strftime('%H:%M').tolist()
             
             for m in mins:
-                minutes[m] += 1
+                try:
+                    minutes[m] += 1
+                except:
+                    # I discovered a "bug" where this line breaks if the database contains minutes that
+                    # are outside of the specified start_hour and end_hour.
+                    
+                    # Specifically, it broke because end_hour was set to 18, so that "18:00" was the last
+                    # key in the minutes dict, but I was working at "18:38". VERY FUN DISCOVERY!
+                    pass
 
-        plt.plot(minutes.keys(), minutes.values())
-        plt.title("Distribution of work throughout the day")
-        plt.xlabel("Time")
-        plt.ylabel("Frequency")
-        plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
-        plt.savefig("workblocks.png")
+            
+            # Save figure
+            plt.plot(minutes.keys(), minutes.values())
+            plt.title("Distribution of work throughout the day")
+            plt.xlabel("Time")
+            plt.ylabel("Frequency")
+            plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
+            plt.savefig("workblocks.png")
+
 
     # Save as .txt or .csv
     elif frmt in ["txt", "csv"]:
