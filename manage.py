@@ -17,7 +17,7 @@ import numpy as np
 #### MAIN UI PROGRAM LOOP
 def main():
     # CREATE THE DATABASE file if it does not already exist.
-    conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
     conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
     conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
     conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
@@ -70,20 +70,26 @@ def help():
     print("\texit: Close the Work Clock manager.")
     print("\thelp: Show this message.\n")
 
+
 def save_data(frmt:str):
     '''Save the data as either .png or .txt'''
-    conn = sqlite3.connect("./data/data.sqlite3", isolation_level=None)
-    workdays = conn.execute("SELECT * FROM 'workdays'").fetchall()
+    conn = sqlite3.connect("data.sqlite3", isolation_level=None)
+    workdays = conn.execute("SELECT * FROM 'workdays' WHERE date IS NOT NULL").fetchall()
     workblocks = conn.execute("SELECT * FROM 'workblocks'").fetchall()
 
     WORKDAY_HOURS = conn.execute("SELECT value FROM 'constants' WHERE variable = 'WORKDAY_HOURS'").fetchall()[0]
 
     if frmt == "img":
         ### Create and save WORKDAYS figure
+        dates = [day[0] for day in workdays]
         hours = [day[3] for day in workdays]
-        plt.plot(hours)
+        plt.plot(dates, hours)
+        plt.xticks(rotation=45)
+        plt.title("Total hours worked")
+        plt.xlabel("Observation index (corresponds to date)")
+        plt.ylabel("Hours")
         plt.hlines(y=WORKDAY_HOURS, xmin=0, xmax=len(hours), colors="grey", linestyles="--")
-        plt.savefig("./data/workdays.png")
+        plt.savefig("workdays.png")
 
         
         ### Create and save WORKBLOCKS figure
@@ -114,16 +120,19 @@ def save_data(frmt:str):
                 minutes[m] += 1
 
         plt.plot(minutes.keys(), minutes.values())
-        plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=90)
-        plt.savefig("./data/workblocks.png")
+        plt.title("Distribution of work throughout the day")
+        plt.xlabel("Time")
+        plt.ylabel("Frequency")
+        plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
+        plt.savefig("workblocks.png")
 
     # Save as .txt or .csv
     elif frmt in ["txt", "csv"]:
-        with open("./data/workdays."+frmt, "w") as f:
+        with open("workdays."+frmt, "w") as f:
             f.write("date, start_time, end_time, hours\n")
             for line in workdays: f.write(", ".join(str(s) for s in line) + "\n")
         
-        with open("./data/workblocks."+frmt, "w") as f:
+        with open("workblocks."+frmt, "w") as f:
             f.write("date, start_time, end_time, hours\n")
             for line in workblocks: f.write(", ".join(str(s) for s in line) + "\n")
 

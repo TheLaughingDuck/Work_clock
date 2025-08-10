@@ -8,6 +8,7 @@ import tkinter as tk
 import time
 from datetime import datetime
 import sqlite3
+from manage import save_data
 
 
 #### MAIN PROGRAM
@@ -133,6 +134,10 @@ class WorkClockApp:
         self.end_time_HH_MM = time.strftime('%H:%M')
         hours = str(round(self.session_count + (1-self.remaining/self.INTERVAL), 1))
         save_workday_data(self.start_time_HH_MM, self.end_time_HH_MM, hours)
+
+        # Save data as img and .csv files
+        save_data(frmt="img")
+        save_data(frmt="csv")
 
         # Destroy window
         self.root.destroy()
