@@ -131,13 +131,13 @@ def save_data(frmt:str):
                     pass
 
             
-            # Save figure
-            plt.plot(minutes.keys(), minutes.values())
-            plt.title("Distribution of work throughout the day")
-            plt.xlabel("Time")
-            plt.ylabel("Frequency")
-            plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
-            plt.savefig("workblocks.png")
+        # Save figure
+        plt.plot(minutes.keys(), minutes.values())
+        plt.title("Distribution of work throughout the day")
+        plt.xlabel("Time")
+        plt.ylabel("Frequency")
+        plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
+        plt.savefig("workblocks.png")
 
 
     # Save as .txt or .csv
