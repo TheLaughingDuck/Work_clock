@@ -78,6 +78,9 @@ class WorkClockApp:
         self.canvas.create_rectangle(self.padding, self.padding, self.padding + self.bar_height, self.padding + self.bar_width, outline="black", width=2)
 
     def update_bar(self):
+        # Remove current progress bar
+        self.canvas.delete("progress")
+        
         # Compute time information
         elapsed = (time.time() - self.start_time) + self.elapsed_time if self.running else self.elapsed_time
         self.remaining = max(self.INTERVAL - elapsed, 0)  # 1500 seconds = 25 minutes, 3600 seconds = 60 minutes
