@@ -10,6 +10,7 @@ from datetime import datetime
 import sqlite3
 from manage import save_data, create_database
 import sys
+import math
 
 
 #### MAIN PROGRAM
@@ -45,7 +46,7 @@ class WorkClockApp:
         self.bar_height = self.GUI_WIDTH - 2 * self.padding
 
         # Set up labels
-        self.completion_label = tk.Label(root, text="Sessions Completed: 0", font=("Helvetica", 12))
+        self.completion_label = tk.Label(root, text="Workday completion: 0 %", font=("Helvetica", 12))
         self.completion_label.pack()
 
         # Create a label with a little list of the variable values
@@ -89,7 +90,7 @@ class WorkClockApp:
         # If still running, update the progress bar
         if self.remaining > 0:
             self.canvas.create_rectangle(self.padding, self.padding, self.padding + (1-proportion_left) * self.bar_height, self.padding + self.bar_width, fill="darkred", width=2, tags="progress")
-            completion_percentage = round(100 * (self.session_count * 3600 + elapsed) / (5*3600))
+            completion_percentage = math.floor(100 * (self.session_count * 3600 + elapsed) / (5*3600))
             self.completion_label.config(text=f"Workday completion: {completion_percentage} %")
 
         # Update timer display
