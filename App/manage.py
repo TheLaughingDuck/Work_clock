@@ -5,7 +5,7 @@ This includes changing the workday length and creating data figures.
 
 Just run this file, and interact with the user interface.
 '''
-
+#%%
 
 #### DEPENDENCIES
 import sqlite3
@@ -36,14 +36,14 @@ def main():
 
             continue
         
-        if inp == "constant":
+        elif inp == "constant":
             pass
             continue
         
-        if inp == "exit":
+        elif inp == "exit":
             exit()
 
-        if inp == "help":
+        elif inp == "help":
             help()
             continue
 
@@ -65,14 +65,17 @@ def create_database():
 
     # Connect and create tables
     conn = sqlite3.connect("data.sqlite3", isolation_level=None)
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
-    conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
+    conn.execute("CREATE TABLE IF NOT EXISTS 'workdays' (id STR PRIMARY KEY, date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
+    conn.execute("CREATE TABLE IF NOT EXISTS 'workblocks' (id STR PRIMARY KEY, date STR DEFAULT NULL, start_time STR NOT NULL, end_time STR NOT NULL, hours REAL NOT NULL);")
     conn.execute("CREATE TABLE IF NOT EXISTS 'constants' (variable STR DEFAULT NULL PRIMARY KEY, value REAL DEFAULT NULL);")
     
     # Insert constants into the constants table
     try:
         conn.execute("INSERT INTO 'constants' (variable, value) VALUES ('WORKDAY_HOURS', 5);")
     except: pass
+
+    conn.commit()
+    conn.close()
 
 def save_data(frmt:str):
     '''Save the data as either .png or .txt'''
@@ -86,6 +89,7 @@ def save_data(frmt:str):
         ### Create and save WORKDAYS figure
         dates = [day[0] for day in workdays]
         hours = [day[3] for day in workdays]
+        plt.figure(0)
         plt.plot(dates, hours)
         plt.xticks(rotation=45)
         plt.title("Total hours worked")
@@ -132,12 +136,24 @@ def save_data(frmt:str):
 
             
         # Save figure
+        plt.figure(1)
         plt.plot(minutes.keys(), minutes.values())
         plt.title("Distribution of work throughout the day")
         plt.xlabel("Time")
         plt.ylabel("Frequency")
         plt.xticks([i*60 for i in range(end_hour-start_hour)], pd.date_range(list(minutes.keys())[0], list(minutes.keys())[-1], freq="1h").strftime('%H:%M').tolist(), rotation=45)
         plt.savefig("workblocks.png")
+        
+
+
+        ### Create a figure for the distribution of workblock length
+        block_lengths = [block[3] for block in workblocks]
+        plt.figure(2)
+        plt.hist(block_lengths, bins=10)
+        plt.title("Distribution of workblock lengths")
+        plt.xlabel("Hours")
+        plt.ylabel("Frequency")
+        plt.savefig("workblock_length_distribution.png")
 
 
     # Save as .txt or .csv
@@ -150,8 +166,12 @@ def save_data(frmt:str):
             f.write("date, start_time, end_time, hours\n")
             for line in workblocks: f.write(", ".join(str(s) for s in line) + "\n")
 
+    conn.commit()
+    conn.close()
+#%%
 
 #### MAIN PROGRAM LOOP INITIATOR (i.e. start the loop when the script is run)
 if __name__ == "__main__":
     create_database()
     main()
+# %%
