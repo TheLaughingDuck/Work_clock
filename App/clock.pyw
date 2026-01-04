@@ -33,7 +33,7 @@ class WorkClockApp:
         # Set up widget window
         self.root = root
         self.root.title("WorkClock")
-        self.root.geometry(f"{self.GUI_WIDTH}x{self.GUI_HEIGHT+30}") # Extra room for additional info.
+        self.root.geometry(f"{self.GUI_WIDTH}x{self.GUI_HEIGHT+30+23}") # Extra room for additional info.
         self.root.attributes('-topmost', True)
         self.root.resizable(True, True)#(False, False)
 
@@ -49,6 +49,9 @@ class WorkClockApp:
         self.completion_label = tk.Label(root, text="Workday completion: 0 %", font=("Helvetica", 12))
         self.completion_label.pack()
 
+        self.remaining_time_label = tk.Label(root, text="Est. rem. time: 300 min.", font=("Helvetica", 12))
+        self.remaining_time_label.pack()
+
         # Create a label with a little list of the variable values
         variables = conn.execute("SELECT * FROM 'constants'").fetchall()
         variables = [f"{var}: {val}" for var, val in variables]
@@ -58,6 +61,7 @@ class WorkClockApp:
 
         # START RUNNING the Clock
         self.running = True
+        self.start_time_unix = time.time()
         self.start_time_HH_MM = time.strftime('%H:%M') # Set up for tracking the start and end times of the working day, e.g. 08:03 and 17:06
         self.start_time = time.time()
         self.elapsed_time = 0
@@ -90,8 +94,16 @@ class WorkClockApp:
         # If still running, update the progress bar
         if self.remaining > 0:
             self.canvas.create_rectangle(self.padding, self.padding, self.padding + (1-proportion_left) * self.bar_height, self.padding + self.bar_width, fill="darkred", width=2, tags="progress")
+            
+            # Show completion percentage
             completion_percentage = math.floor(100 * (self.session_count * 3600 + elapsed) / (5*3600))
             self.completion_label.config(text=f"Workday completion: {completion_percentage} %")
+
+            # Estimate remaining time
+            elapsed_study_seconds = (self.session_count * 3600 + elapsed)            
+            estimated_remaining_seconds = (5*3600 - elapsed_study_seconds) * (time.time() - self.start_time_unix) / (0.0000001+elapsed_study_seconds)
+            estimated_remaining_minutes = math.ceil(estimated_remaining_seconds/60)
+            self.remaining_time_label.config(text=f"Est. rem. time: {estimated_remaining_minutes} min.")
 
         # Update timer display
         minutes = int((elapsed % 3600) // 60)
