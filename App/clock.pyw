@@ -20,7 +20,7 @@ class WorkClockApp:
     # CONSTANTS
     GUI_WIDTH = 200
     GUI_HEIGHT = 60
-    INTERVAL = 3600
+    INTERVAL_SECONDS = 3600 # Adjustable mostly for debugging reasons. The program behaves kind of weird if this is not 3600.
 
     def __init__(self, root):
         '''Initialize the WorkClockApp.'''
@@ -28,7 +28,9 @@ class WorkClockApp:
         # Load customizeable constants from the database
         create_database()
         conn = sqlite3.connect("data.sqlite3", isolation_level=None)
-        WORKDAY_HOURS = conn.execute("SELECT value FROM 'constants' WHERE variable = 'WORKDAY_HOURS'").fetchall()[0]
+        self.WORKDAY_HOURS = conn.execute("SELECT value FROM 'constants' WHERE variable = 'WORKDAY_HOURS'").fetchall()[0][0]
+
+        self.WORKDAY_SECONDS = self.WORKDAY_HOURS * self.INTERVAL_SECONDS
 
         # Set up widget window
         self.root = root
@@ -91,25 +93,25 @@ class WorkClockApp:
         
         # Compute time information
         elapsed = (time.time() - self.start_time) + self.elapsed_time if self.running else self.elapsed_time
-        self.remaining = max(self.INTERVAL - elapsed, 0)  # 1500 seconds = 25 minutes, 3600 seconds = 60 minutes
-        proportion_left = 1-(elapsed / self.INTERVAL)
+        self.remaining = max(self.INTERVAL_SECONDS - elapsed, 0)  # 1500 seconds = 25 minutes, 3600 seconds = 60 minutes
+        proportion_left = 1-(elapsed / self.INTERVAL_SECONDS)
 
         # If still running, update the progress bar
         if self.remaining > 0:
             self.canvas.create_rectangle(self.padding, self.padding, self.padding + (1-proportion_left) * self.bar_height, self.padding + self.bar_width, fill="darkred", width=2, tags="progress")
             
             # Show completion percentage
-            completion_percentage = math.floor(100 * (self.session_count * 3600 + elapsed) / (5*3600))
+            completion_percentage = math.floor(100 * (self.session_count * self.INTERVAL_SECONDS + elapsed) / (self.WORKDAY_SECONDS))
             self.completion_label.config(text=f"Workday completion: {completion_percentage} %")
 
             # Estimate remaining time
-            elapsed_study_seconds = (self.session_count * 3600 + elapsed)            
-            estimated_remaining_seconds = (5*3600 - elapsed_study_seconds) * (time.time() - self.start_time_unix) / (0.0000001+elapsed_study_seconds)
+            elapsed_study_seconds = (self.session_count * self.INTERVAL_SECONDS + elapsed)            
+            estimated_remaining_seconds = (self.WORKDAY_SECONDS - elapsed_study_seconds) * (time.time() - self.start_time_unix) / (0.0000001+elapsed_study_seconds)
             estimated_remaining_minutes = math.ceil(estimated_remaining_seconds/60)
             self.remaining_time_label.config(text=f"Est. rem. time: {estimated_remaining_minutes} min.")
 
             # Estimate time of completion
-            best_possible_finish_time = datetime.fromtimestamp(time.time() + (5*3600 - elapsed_study_seconds)).strftime("%H:%M")
+            best_possible_finish_time = datetime.fromtimestamp(time.time() + (self.WORKDAY_SECONDS - elapsed_study_seconds)).strftime("%H:%M")
             estimated_finish_time = datetime.fromtimestamp(time.time() + estimated_remaining_seconds).strftime("%H:%M")
             self.finish_time_label.config(text=f"Between {best_possible_finish_time} and {estimated_finish_time}")
 
@@ -139,7 +141,7 @@ class WorkClockApp:
             self.elapsed_time += time.time() - self.start_time
 
             # Update the workblocks table
-            hours = str(round((time.time() - self.workblock_start) / 3600, 2))
+            hours = str(round((time.time() - self.workblock_start) / 3600, 2)) # For compatibility reasons, keep this as hours, even if an interval length other than hour is used above.
             save_workblock_data(self.workblock_start_str, time.strftime('%H:%M'), hours)
 
         # START the clock again!
@@ -154,12 +156,12 @@ class WorkClockApp:
     def on_close(self):
         # If still running, also log the current workblock before submitting the workday and ending the program.
         if self.running:
-            hours = str(round((time.time() - self.workblock_start) / 3600, 2))
+            hours = str(round((time.time() - self.workblock_start) / 3600, 2)) # For compatibility reasons, keep this as hours, even if an interval length other than hour is used above.
             save_workblock_data(self.workblock_start_str, time.strftime('%H:%M'), hours)
 
         # Save todays data in the database file
         self.end_time_HH_MM = time.strftime('%H:%M')
-        hours = str(round(self.session_count + (1-self.remaining/self.INTERVAL), 1))
+        hours = str(round(self.session_count + (1-self.remaining / 3600), 1))
         save_workday_data(self.start_time_HH_MM, self.end_time_HH_MM, hours)
 
         # Save data as img and .csv files
