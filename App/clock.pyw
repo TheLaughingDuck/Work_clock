@@ -11,7 +11,7 @@ import sqlite3
 from manage import save_data, create_database
 import sys
 import math
-
+from datetime import datetime
 
 #### MAIN PROGRAM
 class WorkClockApp:
@@ -33,7 +33,7 @@ class WorkClockApp:
         # Set up widget window
         self.root = root
         self.root.title("WorkClock")
-        self.root.geometry(f"{self.GUI_WIDTH}x{self.GUI_HEIGHT+30+23}") # Extra room for additional info.
+        self.root.geometry(f"{self.GUI_WIDTH}x{self.GUI_HEIGHT+30+23+23}") # Extra room for additional info.
         self.root.attributes('-topmost', True)
         self.root.resizable(True, True)#(False, False)
 
@@ -51,6 +51,9 @@ class WorkClockApp:
 
         self.remaining_time_label = tk.Label(root, text="Est. rem. time: 300 min.", font=("Helvetica", 12))
         self.remaining_time_label.pack()
+
+        self.finish_time_label = tk.Label(root, text="Between 00:00 and 00:00", font=("Helvetica", 12))
+        self.finish_time_label.pack()
 
         # Create a label with a little list of the variable values
         variables = conn.execute("SELECT * FROM 'constants'").fetchall()
@@ -104,6 +107,12 @@ class WorkClockApp:
             estimated_remaining_seconds = (5*3600 - elapsed_study_seconds) * (time.time() - self.start_time_unix) / (0.0000001+elapsed_study_seconds)
             estimated_remaining_minutes = math.ceil(estimated_remaining_seconds/60)
             self.remaining_time_label.config(text=f"Est. rem. time: {estimated_remaining_minutes} min.")
+
+            # Estimate time of completion
+            best_possible_finish_time = datetime.fromtimestamp(time.time() + (5*3600 - elapsed_study_seconds)).strftime("%H:%M")
+            estimated_finish_time = datetime.fromtimestamp(time.time() + estimated_remaining_seconds).strftime("%H:%M")
+            self.finish_time_label.config(text=f"Between {best_possible_finish_time} and {estimated_finish_time}")
+
 
         # Update timer display
         minutes = int((elapsed % 3600) // 60)
