@@ -102,12 +102,13 @@ class WorkClockApp:
             
             # Show completion percentage
             completion_percentage = math.floor(100 * (self.session_count * self.INTERVAL_SECONDS + elapsed) / (self.WORKDAY_SECONDS))
+            completion_percentage = min(completion_percentage, 100)
             self.completion_label.config(text=f"Workday completion: {completion_percentage} %")
 
             # Estimate remaining time
             elapsed_study_seconds = (self.session_count * self.INTERVAL_SECONDS + elapsed)            
             estimated_remaining_seconds = (self.WORKDAY_SECONDS - elapsed_study_seconds) * (time.time() - self.start_time_unix) / (0.0000001+elapsed_study_seconds)
-            estimated_remaining_minutes = math.ceil(estimated_remaining_seconds/60)
+            estimated_remaining_minutes = max(math.ceil(estimated_remaining_seconds/60), 0) # Round up and keep it at 0 when the workday hours are exceeded
             self.remaining_time_label.config(text=f"Est. rem. time: {estimated_remaining_minutes} min.")
 
             # Estimate time of completion
